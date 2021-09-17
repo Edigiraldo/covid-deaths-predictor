@@ -10,7 +10,7 @@ The virus can spread from an infected person’s mouth or nose in small liquid p
 
 # Step by step process to predict death cases
 
-## 
+## Tidy data
 
 ## WHO COVID-19 Situation Reports
 
