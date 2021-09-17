@@ -63,7 +63,7 @@ The variables that it was considered to train the model were fully vaccinated po
 
 The implemented model is composed of 3 Neural Network layers. The first one is an LSTM Recurrent Neural Network with 32 units, the second layer is a dense Neural Network layer, and the last layer is an output layer composed of a neuron. The RNN was tuned by 100 ephocs, Huber losses, Adam optimizer, and the mean_absolute_percentage_error as a main metric.
 
-<div align ="center "><img src='./images/trainning.png' width="700"></div>
+<div align ="center "><img src='./images/training.png' width="700"></div>
 
 
 # Results and Discussion
