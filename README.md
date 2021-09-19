@@ -1,169 +1,157 @@
-# Predict death cases for COVID-19
+# Files Structure:
+**Data**: Directory where all data for the model is stored.
+  - **Raw_Data**: Johns Hopkins dataset.
+  - **Processed_Data**: Raw Data after being smoothed, cleaned and filter. Dataset is divided by regions.
+  - **Training_Data**: Data used for the model to train.
+
+**Process_covid_cases_data.ipynb**: Notebook to preprocess covid cases dataset in Raw_Data.
+**Process_covid_deaths_data.ipynb**: Notebook to preprocess death cases dataset in Raw_Data.
+**Process_covid_vaccination_data.ipynb**: Notebook to preprocess covid vaccination data from dataset in Raw_Data.
+
+**Filter_training_data.ipynb**: Notebook to divide datasets into countries and filter unwanted samples. Generates data for Processed_Data directory.
+**Generate_training_data.ipynb**: Notebook to generate data for training after being filtered. Generates data for Training_Data directory.
+**Model_training.ipynb**: Notebook to build and train the model.
+
+# Run the proyect in the following order:
+    - Process_covid_cases_data.ipynb
+    - Process_covid_deaths_data.ipynb
+    - Process_covid_vaccination_data.ipynb
+    - Filter_training_data.ipynb
+    - Generate_training_data.ipynb
+    - Model_training.ipynb
+
+-----------------------------------------
+![](RackMultipart20210919-4-1ff7af8_html_237499165a11f2b9.gif)
+
+### **Predicting covid deaths with Neural Networks.**
+
+![](RackMultipart20210919-4-1ff7af8_html_237499165a11f2b9.gif)
+
+By: Robinson Montes, Daniel Pérez , Diego Gómez and Edison Giraldo. Holberton School.
+
+[Github link](https://github.com/Edigi12Hbtn/Covid_Project).
+
+![](https://cdn-images-1.medium.com/max/1600/0*ZofwnkzVe6V57siQ)
 
 Coronavirus disease (COVID-19) is an infectious disease caused by the SARS-CoV-2 virus.
 
-Most people infected with the virus will experience mild to moderate respiratory illness and recover without requiring special treatment. However, some will become seriously ill and require medical attention. Older people and those with underlying medical conditions like cardiovascular disease, diabetes, chronic respiratory disease, or cancer are more likely to develop serious illness. Anyone can get sick with COVID-19 and become seriously ill or die at any age. 
+Most people infected with the virus will experience mild to moderate respiratory illness and recover without requiring special treatment. However, some will become seriously ill and require medical attention. Older people and those with underlying medical conditions like cardiovascular disease, diabetes, chronic respiratory disease, or cancer are more likely to develop serious illness. Anyone can get sick with COVID-19 and become seriously ill or die at any age.[1]
 
-The best way to prevent and slow down transmission is to be well informed about the disease and how the virus spreads. Protect yourself and others from infection by staying at least 1 metre apart from others, wearing a properly fitted mask, and washing your hands or using an alcohol-based rub frequently. Get vaccinated when it’s your turn and follow local guidance.
+The covid-19 virus appeared in December 2019 when it was identified for the first time in Wuhan, China. Since then, the virus started to spread around the world and the World Health Organization (WHO) declared a[Public Health Emergency of International Concern](https://en.wikipedia.org/wiki/Public_Health_Emergency_of_International_Concern) on 30 January 2020, and a pandemic on 11 March 2020 [2]. Since 2019 and to date, more than 219 M cases have been reported and more than 4.55 M people have died worldwide.
 
-The virus can spread from an infected person’s mouth or nose in small liquid particles when they cough, sneeze, speak, sing or breathe. These particles range from larger respiratory droplets to smaller aerosols. It is important to practice respiratory etiquette, for example by coughing into a flexed elbow, and to stay home and self-isolate until you recover if you feel unwell.
+The efforts around the globe have been focused on developing vaccines, distributing them, imposing restrictive and preventive measures to limit the spread of the virus and models to predict future spikes of Covid infection have also been implemented to plan the government response. This project aims to develop a model to predict deaths caused by Covid, given the cases of Covid-19 for a country and the vaccination data of its population. We believe these work may be useful in the future when we can predict not only Covid infections, but also the deaths caused by those infections.
 
-# Step by step process to predict death cases.
+### **Step by step process to predict death cases.**
 
-## Step 1: Review and Tidying the datasets.
+### **Step 1: Review and Tidying the datasets.**
 
-### Obtain the datasets:
-Datasets are the most relevant point for whatever Machine Learning project, in the case of the current pandemia caused for the SARS-Co2 virus, the speculation about deaths, positive cases, and vaccination, generates a lot of noise in the real statistics for each country reports. To be sure that the data is closer to reality, the datasets were obtained from Jhon Hopkins University API that filter the official reports in World Health Organization -WHO-. 
+### **Obtain the datasets:**
 
-<div align ="center "><img src='./images/raw_data.png' width="700"></div>
+Datasets are the most relevant point for whatever Machine Learning project. In the case of the current pandemia caused by the Covid-19 virus, the speculation about deaths, positive cases, and vaccination, generates a lot of noise in the real statistics for each country reports. To be sure that the data is closer to reality, the datasets were obtained from Johns Hopkins University[github](https://github.com/CSSEGISandData/COVID-19/) that filters the official reports in World Health Organization -WHO-.
 
-### Fix structural errors:
-Remove unwanted observations from COVID dataset and structural errors, notice strange naming conventions, typos, or incorrect capitalization between positive cases, deaths, and vaccination datasets, and variable names in the datasets were normalizing, because these inconsistencies can cause mislabeled categories or classes.
+In the following image you can see the vaccination data set in different countries obtained from the John Hopkins data set.
 
-<div align ="center "><img src='./images/by_country.png' width="700"></div>
+![](https://cdn-images-1.medium.com/max/1600/0*SGKzZWQdsBxFxctr)
 
-### Filter unwanted outliers:
-Often, there will be one-off observations for some countries where, at a glance, they do not appear to fit within the data. In case of countries like Ecuador, France, and Italy, their datasets contains negative values and any picks like strange impulse in some days of the time series.
+Data preprocessing presented us with some challenges. We face problems like lack of data in all data sets, outliers, inconsistent data, noisy series and others.
 
-<div align ="center "><img src='./images/missing_values.png' width="700"></div>
+### **Fix structural difference:**
 
-### Handle missing data:
-As a first option, missing observations were dropped and filling using the inmediately previous day value -Forward filling-.
+One of the first problems we had to deal with was that the data was not structured in the same way. Above you can see that the vaccination data was divided into days, countries and even regions. The structure of the dataset for covid cases is shown below. As can be noticed, the general structure of both datasets was totally different, the dates were not even the same. We even found that countries were not the same in the different datasets, and in some cases the registered &#39;Countries&#39; were in fact cruise ships, as was the case of &#39;MS Zaandam&#39; and &#39;Diamond Princess&#39; which had to be manually checked and deleted from datasets.
 
-<div align ="center "><img src='./images/fill_missing_values.png' width="700"></div>
+![](https://cdn-images-1.medium.com/max/1600/1*TSB3t82NVDobQwfenueH7w.png)
 
-### Apply a smothing algorithm:
-The smoothing techniques are the members of time series forecasting methods or algorithms, which use the weighted average of a past observation to predict the future values or forecast the new value. These techniques are well suited for time-series data having fewer deviations with time. In the case of COVID data, it shows a periodic pattern with a lower index on weekend days with higher values on Monday due to sub-reporting on weekends.
+### **Handle missing data:**
 
-<div align ="center "><img src='./images/smooth_data.png' width="700"></div>
+Another problem we had was that after standardizing the structure of all the data sets, problems such as lack of data appeared on some specific dates. Especially in the vaccination data, we found that data was missing in most cases. What caught our attention was that most of the missing data was on some specific dates. To fill in these values we noticed that a simple forward propagation of values was sufficient. We did not need to use techniques such as linear interpolation because the changes in vaccination in the ranges where data were missing were not so important.
 
-### Validate and QA
-False conclusions because of incorrect or “dirty” data can inform poor business strategy and decision-making. False conclusions can lead to an embarrassing moment in a reporting meeting when you realize your data doesn’t stand up to scrutiny. At the end of this tidy process, the data for each country shows a smoother plot of daily data without outliers.
+![](https://cdn-images-1.medium.com/max/1600/0*AbHtMu3iophBi-ga)
 
-<div align ="center "><img src='./images/tidy_data.png' width="700"></div>
+### **Filter unwanted outliers:**
 
-## Step 2: Normalize and spit the data.
+Some data values were out of range compared to others in some countries. In these cases, these points represented a problem due to the smoothing process that we had to apply to the data to smooth it out. The explanation for these types of points may be that countries sometimes underestimated Covid cases, vaccines or deaths a few weeks before the date of appearance of that outlier, and when countries realize that they underestimated the data , report all past cases not reported in just one day. To fix this, we had to manually go through the dataset and remove these outliers to make the data more suitable to be smoothed in a suitable way to be fed into the neural network. The outliers were replaced by the same value as the previous day.
 
-### Normalize the data:
-COVID-19 data require to be normalized by the total population or max number of positive cases for each country. This criterion is based on the fact that the difference in enumeration unit size for every country can alter how a spatial distribution appears, and the scale for 3 variables that were used in the project reflects a real effect in the final prediction.
+![](https://cdn-images-1.medium.com/max/1600/0*lfQGJ5qOGP73GNsn) ![](https://cdn-images-1.medium.com/max/1600/0*KDWzfn-b400qN8Q7)
 
-<div align ="center "><img src='./images/normalized.png' width="700"></div>
+For countries like Ecuador, France, and Italy, their data sets even contained negative data. In these cases, the outliers were replaced by 0. Since all the data were originally in cumulative values, we assume that these negative values were caused by typographical errors when inserting data, for example, reporting cases without including the correct number of zeros.
 
-### Split data by regions:
-The data was split into different geographical regions: Asia, Europe, Africa, North and Central America, South America, Oceania.
+![](https://cdn-images-1.medium.com/max/1600/0*KRHpOE3vOvUuBrug)
 
-<div align ="center "><img src='./images/regions.png' width="700"></div>
+### **Apply a smoothing algorithm**
 
-### Split the data into Test and validation:
-The variables that it was considered to train the model were fully vaccinated population percentage that is the percentage of the country population that vaccination scheme is completed; partially vaccinated population percentage that is the percentage of the country population that vaccination scheme started but remains for the last dose; The total number of cases per day per country normalized to the total of population. The label variable is the number of total deaths per day per country.
+As shown in the image above in the case of the data for France, some countries showed a periodic pattern with a lower index on weekends and higher values on weekdays due to under reporting of cases on Saturdays and Sundays . Because this noisy data is not as representative of the evolution of Covid cases, we decided to smooth the data with a technique called exponentially weighted average.
 
-<div align ="center "><img src='./images/colombia.png' width="700"></div>
+![](https://cdn-images-1.medium.com/max/1600/0*t3cbElJg12qC9bZ5)
 
-## Step 3: Train the Model
+### **Step 2: Normalize and split the data.**
 
-The implemented model is composed of 3 Neural Network layers. The first one is an LSTM Recurrent Neural Network with 32 units, the second layer is a dense Neural Network layer, and the last layer is an output layer composed of a neuron. The RNN was tuned by 100 ephocs, Huber losses, Adam optimizer, and the mean_absolute_percentage_error as a main metric.
+### **Normalize the data:**
 
-<div align ="center "><img src='./images/training.png' width="700"></div>
+Once we processed the data to make it more fluid and cleaner, we discovered that the data was not yet as appropriate to be fed into a neural network. Typically, daily values for Covid cases in the dataset range from a few units to hundreds of thousands in large countries, values for deaths were generally one-twentieth of the values for Covid cases, whereas data for fully and partially vaccinated people were generally in the range of millions or even hundreds of millions of people.
 
+To make the data more appropriate to be processed for a neural network, we decided to normalize the Covid cases with respect to the maximum value and the vaccination data with respect to the entire population.
 
-# Results and Discussion
+![](https://cdn-images-1.medium.com/max/1600/0*1_A9Su738LTlQIHQ)
 
-We predict the number of daily deaths for COVID-19 during current pandemia using artificial intelligence. The accuracies of simulation of deaths for COVID-19 are high. So, the RNN can be used for simulations. The results show that using country data by region has the best performance. The 3 input variables are selected to create an RNN model. We also can use the RNN with Long Short-Term Memory (LSTM) to predict the number of virus epidemic outbreaks in the future.
+Regarding the death data, we had to normalize it in a way that was proportional to the vaccination data, and we decided that the best normalization factor we could take would be a naive estimate of the maximum Covid death based on the maximum number of reported Covid cases. The latter assumption stems from the fact that the country with the worst death outcome was assumed to have no more than 10% of deaths compared to reported cases every day.
 
-We provide a simple AI model for this project to understand the behavior of deaths for COVID-19 from 2020 january data based on specific estimates of global past historical data. The actual data of the confirmed case of COVID-19 in progress is not well-matched with that of AI, which strongly shows that it is suitable for simulating the epidemic caused by SARS-CoV-2. 
+### **Split data by regions:**
 
-The percentage error decrease drastically throws the ephocs but it is ridiculously high in the order of 10⁶.
+When analyzing the data after pre-processing and normalization, we found that not all countries exhibited the same behavior with respect to Covid cases vs Covid deaths. One of the observations was that countries that faced the pandemic first, had a higher death rate at its first peak than countries where the pandemic arrived later. In the image below can be seen how in Latin American countries, the proportion in Covid deaths and cases is kept in all different peaks (For getting the real proportion between Covid cases and deaths in the graphs down below, you have to divide by 10 Covid deaths):
 
-<div align ="center "><img src='./images/percentage_error.png' width="700"></div>
+![](https://cdn-images-1.medium.com/max/1600/0*cZNjKgZmkf1bxAgS)
 
-This are the result for some south american countries. In the top: Red line represents the real number of daily deaths, Green line represents the predicted number of deaths by the model, Blue line is the positive cases in scale 1:40 (just to fit in the plot window), and the bottom subplot shows the percentage of partially and fully vaccined population.
+While European countries which suffered from Covid some months before, had non-proportional Covid deaths with respect to Covid cases in their first peak compared to the following peaks.
 
-<div align ="center "><img src='./images/argentina.png' width="700"></div>
+![](https://cdn-images-1.medium.com/max/1600/0*FRGYLmY4erHpi-at)
 
-<div align ="center "><img src='./images/bolivia.png' width="700"></div> 
+To get better results when predicting Covid deaths and after seeing this marked behavior in different regions of the world, we decided to divide the data into different geographic regions: Asia, Europe, Africa, North and Central America, South America, Oceania. A better distribution of countries can be considered in future improvements.
 
-<div align ="center "><img src='./images/brazil.png' width="700"></div>
+### **Step 3: Train the Model**
 
-<div align ="center "><img src='./images/chile.png' width="700"></div> 
+#### **The model architecture**
 
-<div align ="center "><img src='./images/colombia_results.png' width="700"></div> 
+To train the model to predict Covid deaths based on vaccination rates and Covid cases in countries, we used a relatively simple architecture. Our model consisted of 3 layers of neural networks. The first is an LSTM recurrent neural network (NN) with 32 hidden units, the second layer is a dense neural network with also 32 units, and the last layer is an output layer composed of a single neuron. We also tried some other architectures like GRU, Bidirectional and multilayer LSTMs and also RNNs but they did not show a significant improvement. The NN was tuned for 100 epochs, with the mean\_absolute\_percentage\_error as a metric, Huber loss and Adam optimizer.
 
-<div align ="center "><img src='./images/ecuador.png' width="700"></div> 
+![](https://cdn-images-1.medium.com/max/1600/0*ObZqfqUj4dRxbKJE) ![](https://cdn-images-1.medium.com/max/1600/0*4CkvY4eSsGRQYfE0)
 
-<div align ="center "><img src='./images/guyana.png' width="700"></div> 
+### **Results**
 
-<div align ="center "><img src='./images/paraguay.png' width="700"></div> 
+#### **Some specific cases to work on**
 
-<div align ="center "><img src='./images/peru.png' width="700"></div>
+First, we must keep in mind that due to the nature of the data, there were a limited number of training examples that could be used. Due to the division that was made to improve the model results, it further limited the number of examples for each region. Below you can see the number of training examples used for each set.
 
-<div align ="center "><img src='./images/suriname.png' width="700"></div> 
+![](https://cdn-images-1.medium.com/max/1600/0*3XyAFKUZ8QOT8NJm)
 
-<div align ="center "><img src='./images/uruguay.png' width="700"></div>
+One approach that can be taken in the future to improve the quantity of data, would be not to take small countries to avoid noisy data, would be to split countries with many population into sub regions. For example, instead of taking the US as a country, it can be divided into states.
 
-<div align ="center "><img src='./images/venezuela.png' width="700"></div>
+![](https://cdn-images-1.medium.com/max/1600/0*0X2t309NxUewNHt_) ![](https://cdn-images-1.medium.com/max/1600/0*8V_PYUp3jowAuiCv)
 
-Be careful with the result because there are a lot of factors that could affect the data published by each country and territory. Lower COVID positive cases were found in countries that have been recognized for their success in responding to the COVID-19 pandemic, including New Zealand, Taiwan, Australia, Iceland, and South Korea. These countries have had high testing rates, comprehensive contact tracing programs, and relative success in mitigating the health impacts of the virus. It should be noted that while the estimates from this model showed substantial underreporting of infections tht affects the behavior of the curves, moreover, the overall period prevalence remained less than 10 percent in nearly all countries. Such a low proportion of the population presumably with antibodies is far from conferring herd immunity that may inhibit future disease transmission. 
+Above are results for Singapore and Laos, where NN was unable to adequately predict deaths. Covid cases that were rescaled by a factor of 1/40 are shown in blue to make them be on the same scale as deaths. The real deaths are shown in red and the predicted deaths given by the model are shown in green, both in real scale. As can be seen, in the first case, the NN could not predict the low number of deaths in Singapore despite the data being used for training, the second case is similar, and all similar cases in the model present a pattern and it is that the deaths in those countries were quite low or almost non-existent. To solve this problem, the NN could also be fed with metrics about the health system in the countries, the population they have, or even metrics such as per capita gross domestic product can be used.
 
-It is important to note that, while these proportions are much higher than the officially reported cases, they do not represent herd immunity concept considered important to fully reopening society.
+![](https://cdn-images-1.medium.com/max/1600/1*9Qv9Q21SAXyPjl43f22ukw.png)
 
-# Conclusion and Future work
+As shown in the case of Peru and other countries with high death rates, the NN also faced problems finding a better scale for predicting deaths. This type of country shows the lack of input metrics that can guide the NN to find an appropriate scale for predicting deaths from covid. In future enhancements when we are trying to predict future covid deaths, the NN could be fed with some initial information on actual deaths that could help the neural network achieve better results in these cases.
 
-This project is another way to evaluates the overall prediction of COVID-19 death cases in the current pandemic using a Recurrent Neural Network on reported data among 163 countries and territories. The RNN layer incorporated positive cases rate, fully vaccinated rate, partially vaccinated cases, and an estimate of daily death cases based upon reported death data by adjusting for heterogeneity and normalization by country population in testing levels, but the success of the model depends on the every country's health system capacity, and government transparency when its upload the data in World Health Organization system. The estimated death cases of COVID-19 are really dispersed from the previous empirical and epidemiological models, and the estimated error varies from a huge range for each country. National policies that facilitated open public testing and extensive contact tracing were significantly associated with higher values of COVID, which reflected improvements in the estimated detection. Extrinsic factors, including geographic isolation and centralized forms of government, were also shown to be associated with improved proposal model outcomes. Another way to generate a better fitting model is training the dataset for every country and use statistical and epidemiology adjustment.
+One final challenge to work on is getting better data or working on better ways to filter it. Below is an issue found with some samples, where even though covid cases were quite low when the pandemic started, secondary reports on covid cases do not provide the NN with adequate information to guess the true scale of deaths by covid.
 
-We encourage other researchers to build on this analysis by combining this metric with other databases that can account for other possible factors, such as trust in government institutions, demographics, or urban/rural distribution. Such analyses could further elucidate other extrinsic factors related to COVID-19 daily death cases. Research could also be done to understand how association with other factors changes over time, as the pandemic progresses through different stages. Sub-national analyses may also be possible using the mathematical relationships defined. In order to decrease the prediction error in the model, a new model that combines the current Recurrent Neural Network (RNN) with an Statistical Neural Network (SNN), Probabilistic Neural Network (PNN), Radial Basis Function Neural Network (RBFNN), Generalized Regression Neural Network (GRNN), and Autoregressive Neural Network (NAR-NN). 
+![](https://cdn-images-1.medium.com/max/1600/0*OJwPHPZQBpsi7_Co)
 
+#### **Achievements**
 
-## John Hopkins notes:
+![](https://cdn-images-1.medium.com/max/1600/0*TVGqguqwBUuVcfQT) ![](https://cdn-images-1.medium.com/max/1600/1*ylWPn0K7mmiqINZmSo9veQ.png) ![](https://cdn-images-1.medium.com/max/1600/0*hSAr45ztV33rNr8j) ![](https://cdn-images-1.medium.com/max/1600/1*ezIgREuSKqEyhxGhc8rDlA.png)
 
-### WHO COVID-19 Situation Reports
+First, there is the relative success of the model in predicting deaths on the same scale as the actual death cases in most samples. It is also important to note how the predicted death peaks in each country always shift to the right compared to the peaks related to covid cases. The latter makes sense considering that people usually die a few weeks after getting sick. There is another quite important characteristic of the predicted death curves, and that is that the covid curves always have almost the same shape as the cases, a common characteristic that is found in almost all predictions.
 
-This folder summarizes the confirmed cases from WHO COVID-2019 situation reports. WHO defines the confirmed case as "a person with laboratory confirmation of 2019-nCoV infection, irrespective of clinical signs and symptoms. " (Source) Therefore, its data on and after Feb 13 should have a huge gap compared with our daily reports. In order to bring a more comprehensive picture of the current coronavirus situation, we create this folder, which will serve as a good complementary to our daily report and the dashboard.
-Notes
+### **Conclusions**
 
-* Time Zone: We assume that WHO reports in Geneva, Switzerland time (GMT+1). All date in this folder is in GMT+1.
-* Update Frequency: We maintain this dataset at least twice a week.
+- We were able to overcome problems in the original dataset with missing data, clean up the noise, identify inappropriate samples, and generally pre-process and standardize the data provided.
+- We believe the approach of using NN to predict COVID deaths can be successful, but the biggest challenge is finding more appropriate metrics and getting better, cleaner data.
+- There are some issues to work on, such as the need to look for metrics that can give the NN a better way to estimate the scale of predicted deaths, find a better way to divide the data into different sets better than just continents, and handle the predictions for countries where COVID deaths did not exist or were low.
+- Despite the problems we encountered, we can show future approaches that can be taken to overcome it and we were able to build a model that predicts covid deaths as expected in most cases.
 
+### **References**
 
-### Data was obtained from: 2019 Novel Coronavirus COVID-19 (2019-nCoV) Data Repository by Johns Hopkins CSSE
+[1][https://www.who.int/health-topics/coronavirus#tab=tab\_1](https://www.who.int/health-topics/coronavirus#tab=tab_1)
 
-This is the data repository for the 2019 Novel Coronavirus Visual Dashboard operated by the Johns Hopkins University Center for Systems Science and Engineering (JHU CSSE). Also, Supported by ESRI Living Atlas Team and the Johns Hopkins University Applied Physics Lab (JHU APL).
-
-Visual Dashboard (desktop): [https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6](
-https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6)
-
-Visual Dashboard (mobile): [http://www.arcgis.com/apps/opsdashboard/index.html#/85320e2ea5424dfaaa75ae62e5c06e61](
-http://www.arcgis.com/apps/opsdashboard/index.html#/85320e2ea5424dfaaa75ae62e5c06e61)
-
-Lancet Article: An interactive web-based dashboard to track COVID-19 in real time
-
-[Provided by Johns Hopkins University Center for Systems Science and Engineering (JHU CSSE):](
-https://systems.jhu.edu/)
-
-### Data Sources:
-
-*    World Health Organization (WHO): https://www.who.int/
-*    DXY.cn. Pneumonia. 2020. http://3g.dxy.cn/newh5/view/pneumonia.
-*    BNO News: https://bnonews.com/index.php/2020/02/the-latest-coronavirus-cases/
-*    National Health Commission of the People’s Republic of China (NHC):
-*    http://www.nhc.gov.cn/xcs/yqtb/list_gzbd.shtml
-*    China CDC (CCDC): http://weekly.chinacdc.cn/news/TrackingtheEpidemic.htm
-*    Hong Kong Department of Health: https://www.chp.gov.hk/en/features/102465.html
-*    Macau Government: https://www.ssm.gov.mo/portal/
-*    Taiwan CDC: https://sites.google.com/cdc.gov.tw/2019ncov/taiwan?authuser=0
-*    US CDC: https://www.cdc.gov/coronavirus/2019-ncov/index.html
-*    Government of Canada: https://www.canada.ca/en/public-health/services/diseases/coronavirus.html
-*    Australia Government Department of Health: https://www.health.gov.au/news/coronavirus-update-at-a-glance
-*    European Centre for Disease Prevention and Control (ECDC): https://www.ecdc.europa.eu/en/geographical-distribution-2019-ncov-cases
-*    Ministry of Health Singapore (MOH): https://www.moh.gov.sg/covid-19
-*    Italy Ministry of Health: http://www.salute.gov.it/nuovocoronavirus
-*    1Point3Arces: https://coronavirus.1point3acres.com/en
-*    WorldoMeters: https://www.worldometers.info/coronavirus/
-
-
-Additional Information about the Visual Dashboard: [https://systems.jhu.edu/research/public-health/ncov/](
-https://systems.jhu.edu/research/public-health/ncov/)
-
-
-### Terms of Use of John Hopkins:
-
-This GitHub repo and its contents herein, including all data, mapping, and analysis, copyright 2020 Johns Hopkins University, all rights reserved, is provided to the public strictly for educational and academic research purposes. The Website relies upon publicly available data from multiple sources, that do not always agree. The Johns Hopkins University hereby disclaims any and all representations and warranties with respect to the Website, including accuracy, fitness for use, and merchantability. Reliance on the Website for medical guidance or use of the Website in commerce is strictly prohibited.
+[2][https://en.wikipedia.org/wiki/COVID-19\_pandemic](https://en.wikipedia.org/wiki/COVID-19_pandemic)
